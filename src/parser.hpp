@@ -31,7 +31,7 @@ namespace detail
 
    inline bool is_operator(const char_type c)
    {
-      return   ('+' == c) || ('-' == c);
+      return   ('+' == c) || ('-' == c) || ('*' == c) || ('/' == c);
    }
 
    inline bool is_digit(const char_type c)
@@ -41,12 +41,12 @@ namespace detail
 
    inline bool is_left_bracket(const char_type c)
    {
-      return ('(' == c);
+      return ('(' == c) || ('{' == c) || ('[' == c);
    }
 
    inline bool is_right_bracket(const char_type c)
    {
-      return (')' == c);
+      return (')' == c) || ('}' == c) || (']' == c);
    }
 
    inline bool is_bracket(const char_type c)
@@ -57,6 +57,11 @@ namespace detail
    inline bool is_escape(const char_type c)
    {
       return ('\\' == c);
+   }
+   
+   inline bool is_underscore(const char_type c)
+   {
+      return ('_' == c);
    }
    
    inline char_type get_char(char_ptr cptr)
@@ -100,6 +105,7 @@ namespace lexer
             ,  oper     , assign
             ,  lbracket = '(', rbracket = ')'
             ,  add      = '+', sub      = '-'
+            ,  mult     = '*', div      = '/'
             ,  eq       = '='
             };
 
@@ -145,6 +151,14 @@ namespace lexer
       {
          return token::token_type::sub;
       }
+      else if('*' == c)
+      {
+         return token::token_type::mult;
+      }
+      else if('/' == c)
+      {
+         return token::token_type::div;
+      }
       else
       {
          return token::token_type::error;
@@ -183,15 +197,9 @@ namespace lexer
                {
                   scan_operator();
                }
-               else if(detail::is_left_bracket(*s_itr_))
+               else if(detail::is_bracket(*s_itr_))
                {
-                  token_list_.emplace_back(token{token::token_type::lbracket, "("});
-                  ++s_itr_;
-               }
-               else if(detail::is_right_bracket(*s_itr_))
-               {
-                  token_list_.emplace_back(token{token::token_type::rbracket, ")"});
-                  ++s_itr_;
+                  scan_bracket();
                }
                else
                {
@@ -219,13 +227,47 @@ namespace lexer
             }
          }
 
+         void scan_bracket()
+         {
+            if('(' == *s_itr_)
+            {
+               token_list_.emplace_back(token{token::token_type::lbracket, "("});
+            }
+            else if('{' == *s_itr_)
+            {
+               token_list_.emplace_back(token{token::token_type::lbracket, "{"});
+            }
+            else if('[' == *s_itr_)
+            {
+               token_list_.emplace_back(token{token::token_type::lbracket, "["});
+            }
+            else if(')' == *s_itr_)
+            {
+               token_list_.emplace_back(token{token::token_type::rbracket, ")"});
+            }
+            else if('}' == *s_itr_)
+            {
+               token_list_.emplace_back(token{token::token_type::rbracket, "}"});
+            }
+            else if(']' == *s_itr_)
+            {
+               token_list_.emplace_back(token{token::token_type::rbracket, "]"});
+            }
+            else
+            {
+               // error
+            }
+
+            ++s_itr_;
+         }
+
          void scan_symbol()
          {
             build_string str;
 
             while(s_itr_ != s_end_)
             {
-               if(detail::is_letter(*s_itr_) || detail::is_digit(*s_itr_))
+               if(detail::is_letter(*s_itr_) || detail::is_digit(*s_itr_) || detail::is_underscore(*s_itr_))
                {
                   str.append(*s_itr_);
                }

@@ -78,8 +78,12 @@ namespace lexer_test
    void lexer_check_is_left_bracket::do_test()
    {
       UNIT_ASSERT(parser::detail::is_left_bracket('('), "parser::detail::is_left_bracket() failed.");
+      UNIT_ASSERT(parser::detail::is_left_bracket('{'), "parser::detail::is_left_bracket() failed.");
+      UNIT_ASSERT(parser::detail::is_left_bracket('['), "parser::detail::is_left_bracket() failed.");
       
       UNIT_ASSERT(!parser::detail::is_left_bracket(')'), "parser::detail::is_left_bracket() failed.");
+      UNIT_ASSERT(!parser::detail::is_left_bracket('}'), "parser::detail::is_left_bracket() failed.");
+      UNIT_ASSERT(!parser::detail::is_left_bracket(']'), "parser::detail::is_left_bracket() failed.");
    }
    
    /**
@@ -88,8 +92,12 @@ namespace lexer_test
    void lexer_check_is_right_bracket::do_test()
    {
       UNIT_ASSERT( parser::detail::is_right_bracket(')'), "parser::detail::is_right_bracket() failed.");
+      UNIT_ASSERT( parser::detail::is_right_bracket('}'), "parser::detail::is_right_bracket() failed.");
+      UNIT_ASSERT( parser::detail::is_right_bracket(']'), "parser::detail::is_right_bracket() failed.");
       
       UNIT_ASSERT(!parser::detail::is_right_bracket('('), "parser::detail::is_right_bracket() failed.");
+      UNIT_ASSERT(!parser::detail::is_right_bracket('{'), "parser::detail::is_right_bracket() failed.");
+      UNIT_ASSERT(!parser::detail::is_right_bracket('['), "parser::detail::is_right_bracket() failed.");
    }
    
    /**
@@ -98,7 +106,11 @@ namespace lexer_test
    void lexer_check_is_bracket::do_test()
    {
       UNIT_ASSERT(parser::detail::is_bracket('('), "parser::detail::is_bracket() failed.");
+      UNIT_ASSERT(parser::detail::is_bracket('{'), "parser::detail::is_bracket() failed.");
+      UNIT_ASSERT(parser::detail::is_bracket('['), "parser::detail::is_bracket() failed.");
       UNIT_ASSERT(parser::detail::is_bracket(')'), "parser::detail::is_bracket() failed.");
+      UNIT_ASSERT(parser::detail::is_bracket('}'), "parser::detail::is_bracket() failed.");
+      UNIT_ASSERT(parser::detail::is_bracket(']'), "parser::detail::is_bracket() failed.");
    }
    
    /**
@@ -118,6 +130,56 @@ namespace lexer_test
 
       UNIT_ASSERT_EQUAL(t.type() , parser::lexer::token::token_type::symbol, "token::type not set correctly." );
       UNIT_ASSERT_EQUAL(t.value(), std::string{"abc"}                      , "token::value not set correctly.");
+   }
+
+   /**
+    * Check lexer token generation.
+    **/
+   void lexer_token_generation::do_test()
+   {
+      std::string str{"1 + (abcd_e * 3.0) { }"};
+      parser::lexer::lexer l(const_cast<char*>(str.c_str()), const_cast<char*>(str.c_str()) + str.size());
+      l.scan_token();
+      
+      auto t = l.next_token();
+      UNIT_ASSERT_EQUAL(t.type() , parser::lexer::token::token_type::begin, "token type not correct.");
+      UNIT_ASSERT_EQUAL(t.value(), std::string{""}                        , "token value not correct.");
+
+      t = l.next_token();
+      UNIT_ASSERT_EQUAL(t.type() , parser::lexer::token::token_type::number, "token type not correct.");
+      UNIT_ASSERT_EQUAL(t.value(), std::string{"1"}                        , "token value not correct.");
+      
+      t = l.next_token();
+      UNIT_ASSERT_EQUAL(t.type() , parser::lexer::token::token_type::add, "token type not correct.");
+      UNIT_ASSERT_EQUAL(t.value(), std::string{"+"}                     , "token value not correct.");
+      
+      t = l.next_token();
+      UNIT_ASSERT_EQUAL(t.type() , parser::lexer::token::token_type::lbracket, "token type not correct.");
+      UNIT_ASSERT_EQUAL(t.value(), std::string{"("}                          , "token value not correct.");
+      
+      t = l.next_token();
+      UNIT_ASSERT_EQUAL(t.type() , parser::lexer::token::token_type::symbol, "token type not correct.");
+      UNIT_ASSERT_EQUAL(t.value(), std::string{"abcd_e"}                   , "token value not correct.");
+      
+      t = l.next_token();
+      UNIT_ASSERT_EQUAL(t.type() , parser::lexer::token::token_type::mult, "token type not correct.");
+      UNIT_ASSERT_EQUAL(t.value(), std::string{"*"}                      , "token value not correct.");
+      
+      t = l.next_token();
+      UNIT_ASSERT_EQUAL(t.type() , parser::lexer::token::token_type::number, "token type not correct.");
+      UNIT_ASSERT_EQUAL(t.value(), std::string{"3.0"}                      , "token value not correct.");
+      
+      t = l.next_token();
+      UNIT_ASSERT_EQUAL(t.type() , parser::lexer::token::token_type::rbracket, "token type not correct.");
+      UNIT_ASSERT_EQUAL(t.value(), std::string{")"}                          , "token value not correct.");
+      
+      t = l.next_token();
+      UNIT_ASSERT_EQUAL(t.type() , parser::lexer::token::token_type::lbracket, "token type not correct.");
+      UNIT_ASSERT_EQUAL(t.value(), std::string{"{"}                          , "token value not correct.");
+      
+      t = l.next_token();
+      UNIT_ASSERT_EQUAL(t.type() , parser::lexer::token::token_type::rbracket, "token type not correct.");
+      UNIT_ASSERT_EQUAL(t.value(), std::string{"}"}                          , "token value not correct.");
    }
 
 } /* namespace test */

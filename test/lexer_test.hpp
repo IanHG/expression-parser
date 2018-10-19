@@ -57,4 +57,10 @@ struct lexer_token_construction
    void do_test();
 };
 
+struct lexer_token_generation
+   :  public cutee::unit_test
+{
+   void do_test();
+};
+
 } /* namespace test */

@@ -23,6 +23,11 @@ int main()
     * token_test
     * ***************************************************************** */
    suite.add_test<lexer_test::lexer_token_construction>("Check parser::lexer::token construction.");
+   
+   /* *****************************************************************
+    * lexer_test
+    * ***************************************************************** */
+   suite.add_test<lexer_test::lexer_token_generation>("Check parser::lexer token generation.");
 
    /* *****************************************************************
     * Run tests

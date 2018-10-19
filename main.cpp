@@ -31,6 +31,8 @@ int main()
    //
    
    std::string str = "abc (-10.22123 + 123.23 --lol 3423)";
+   //std::string str{"1 + (2 * 3 + 4) { abc }"};
+
 
    ::parser::parser p;
    p.compile(str);
