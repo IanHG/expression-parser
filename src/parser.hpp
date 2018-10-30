@@ -63,6 +63,11 @@ namespace detail
    {
       return ('_' == c);
    }
+
+   inline bool is_special(const char_type c)
+   {
+      return ('#' == c);
+   }
    
    inline char_type get_char(char_ptr cptr)
    {
@@ -106,7 +111,7 @@ namespace lexer
             ,  lbracket = '(', rbracket = ')'
             ,  add      = '+', sub      = '-'
             ,  mult     = '*', div      = '/'
-            ,  eq       = '='
+            ,  eq       = '=', hash     = '#'
             };
 
          token(token_type type, std::string&& value = std::string{""})
@@ -200,6 +205,10 @@ namespace lexer
                else if(detail::is_bracket(*s_itr_))
                {
                   scan_bracket();
+               }
+               else if(detail::is_special(*s_itr_))
+               {
+                  scan_special();
                }
                else
                {
@@ -312,6 +321,16 @@ namespace lexer
             token_list_.emplace_back(std::move(t));
          }
 
+         void scan_special()
+         {
+            if('#' == *s_itr_)
+            {
+               token_list_.emplace_back(token{token::token_type::hash, "#"});
+            }
+
+            ++s_itr_;
+         }
+
          token current_token()
          {
             return *(token_list_ptr_);
@@ -327,6 +346,19 @@ namespace lexer
             {
                return token{token::token_type::end};
             }
+         }
+
+         token peek_token(int ipeek = 1)
+         {
+            auto list_ptr_ = token_list_ptr_;
+            for(int i = 1; i < ipeek; ++i)
+            {
+               if(!is_token_end(*list_ptr_))
+               {
+                  ++list_ptr_;
+               }
+            }
+            return *list_ptr_;
          }
 
       private:
